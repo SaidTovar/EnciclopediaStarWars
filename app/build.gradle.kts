@@ -67,11 +67,17 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //ConstraintLayout
+    implementation(libs.androidx.constraintlayout.compose)
+
+    //Icons extended
+    implementation(libs.androidx.material.icons.extended.android)
+
     //Rive
-    implementation ("app.rive:rive-android:8.7.0")
-    implementation ("androidx.startup:startup-runtime:1.1.1")
+    implementation (libs.rive.android)
+    implementation (libs.androidx.startup.runtime)
 
     //haze
-    implementation("dev.chrisbanes.haze:haze:0.7.3")
+    implementation(libs.haze)
     
 }
