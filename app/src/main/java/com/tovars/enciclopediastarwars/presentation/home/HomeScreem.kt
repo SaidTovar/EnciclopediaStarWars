@@ -1,30 +1,31 @@
-package com.tovars.enciclopediastarwars.screem
+package com.tovars.enciclopediastarwars.presentation.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Groups3
 import androidx.compose.material.icons.filled.LocalTaxi
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonalInjury
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Rocket
+import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Card
@@ -42,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -51,16 +53,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.compose.collectAsLazyPagingItems
 import app.rive.runtime.kotlin.core.ExperimentalAssetLoader
 import app.rive.runtime.kotlin.core.Fit
 import com.tovars.enciclopediastarwars.R
+import com.tovars.enciclopediastarwars.presentation.ComposableRiveAnimationView
+import com.tovars.enciclopediastarwars.presentation.model.People
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
+import kotlin.random.Random
 
 @Composable
-fun HomeScreem() {
+fun HomeScreem(homeViewModel: HomeViewModel = hiltViewModel()) {
+
     Scaffold(
         topBar = {
 
@@ -69,10 +78,11 @@ fun HomeScreem() {
         },
         content = { padingvalue ->
 
-            Content(padingvalue)
+            Content(padingvalue, homeViewModel)
 
         }
     )
+
 }
 
 @OptIn(ExperimentalAssetLoader::class)
@@ -186,7 +196,10 @@ private fun SearchBar(
             .clip(RoundedCornerShape(10.dp)),
         //onTextLayout = { layoutResult.value = it },
         maxLines = 1,
-        textStyle = TextStyle(color = Color.White),
+        textStyle = TextStyle(
+            color = Color.White,
+            fontFamily = FontFamily(Font(R.font.starjedi))
+        ),
         cursorBrush = SolidColor(Color.White),
         decorationBox = { innerTextField ->
 
@@ -255,7 +268,7 @@ private fun SearchBar(
 
 @OptIn(ExperimentalAssetLoader::class)
 @Composable
-private fun Content(padingvalue: PaddingValues) {
+private fun Content(padingvalue: PaddingValues, homeViewModel: HomeViewModel) {
 
 
     Box(
@@ -275,7 +288,7 @@ private fun Content(padingvalue: PaddingValues) {
 
             ItemsFilter()
 
-            ItemsList()
+            ItemsList(homeViewModel)
 
         }
 
@@ -329,106 +342,60 @@ data class StarWarsItem(
     val title: String,
     val description: String,
     val image: Int,
-    val type: ItemType
+    val type: ItemType2,
+    val id: Long = Random.nextLong()
 )
 
-enum class ItemType {
-    MOVIE,
-    PERSON,
-    PLANET,
-    STARSHIP,
-    VEHICLE
+sealed class ItemType2(val icon: ImageVector) {
+    data object Movie : ItemType2(Icons.Filled.Movie)
+    data object Person : ItemType2(Icons.Filled.Person)
+    data object Planet : ItemType2(Icons.Filled.Public)
+    data object Starship : ItemType2(Icons.Filled.RocketLaunch)
+    data object Vehicle : ItemType2(Icons.Filled.DirectionsCar)
 }
 
 @Composable
-private fun ItemsList() {
+private fun ItemsList(homeViewModel: HomeViewModel) {
 
     val itemsList = listOf(
+        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
+        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
+        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
+        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
+        // Add more items as needed
+        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
+        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
+        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
+        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
+        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
+        // Add more items as needed
+        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
 
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType.PLANET),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType.MOVIE),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.lukes, ItemType.PERSON),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType.STARSHIP),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType.VEHICLE),
+        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
+        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
+        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
+        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
+        // Add more items random
+        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
+        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
+        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
+        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
+        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
+        // Add more items as needed
+        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
 
-        )
+        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
+        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
+        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
+        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
+        // Add more items as needed
+        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
+        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
+        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
+        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
+    )
 
-    val itemsList2 = (0..15).toList()
-
-    val itemModifier = Modifier
-        .border(1.dp, Color.Blue)
-        .width(80.dp)
-        .wrapContentSize()
+    val listPeople = homeViewModel.listPeople.collectAsLazyPagingItems()
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
@@ -438,11 +405,107 @@ private fun ItemsList() {
 
         ) {
 
-        items(itemsList) {
+        items(listPeople.itemCount) {
+
+            listPeople[it]?.let { people ->
+
+                CardItem2(people)
+
+            }
+
+        }
+
+       /* items(itemsList, key = { it.id }) {
 
             CardItem(it)
 
+        }*/
+
+    }
+
+}
+
+@Composable
+private fun CardItem2(people: People) {
+
+    Card(
+        modifier = Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { }
+    ) {
+
+        ConstraintLayout {
+
+            val (itemBox, title, description, icon) = createRefs()
+/*
+            val painter = painterResource(id = itemStarWarsItem.image)
+
+            val aspectRatio = painter.intrinsicSize.width / painter.intrinsicSize.height
+
+            Image(
+                painter = painter,
+                contentDescription = itemStarWarsItem.title,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.aspectRatio(aspectRatio)
+            )*/
+
+            Box(
+                modifier = Modifier
+                    .background(brush = Brush.verticalGradient(
+                        listOf(
+                            Color.Transparent,
+                            Color.Black
+                        )
+                    )).constrainAs(itemBox) {
+
+                        top.linkTo(title.top, margin = -(4).dp)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+
+            ) {
+
+            }
+
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = people.birth_year,
+                modifier = Modifier.constrainAs(icon) {
+
+                    top.linkTo(title.top)
+                    bottom.linkTo(description.bottom)
+                    end.linkTo(parent.end, margin = 4.dp)
+
+                }
+            )
+
+            Text(
+                people.name,
+                modifier = Modifier.constrainAs(title) {
+
+                    bottom.linkTo(description.top)
+                    start.linkTo(parent.start, margin = 4.dp)
+
+                }
+            )
+
+            Text(
+                people.birth_year,
+                modifier = Modifier.constrainAs(description) {
+
+                    bottom.linkTo(parent.bottom, margin = 4.dp)
+                    start.linkTo(parent.start, margin = 4.dp)
+
+                }
+            )
+
+
         }
+
 
     }
 
@@ -454,30 +517,64 @@ private fun CardItem(itemStarWarsItem: StarWarsItem) {
     Card(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            //.fillMaxWidth()
             .clickable { }
     ) {
 
-        ConstraintLayout(
-            //modifier = Modifier.fillMaxWidth()
-        ) {
+        ConstraintLayout {
 
-            val (image, title, description) = createRefs()
+            val (itemBox, title, description, icon) = createRefs()
+
+            val painter = painterResource(id = itemStarWarsItem.image)
+
+            val aspectRatio = painter.intrinsicSize.width / painter.intrinsicSize.height
 
             Image(
-                painter = painterResource(id = itemStarWarsItem.image),
+                painter = painter,
                 contentDescription = itemStarWarsItem.title,
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.aspectRatio(aspectRatio)
+            )
+
+            Box(
+                modifier = Modifier
+                    .background(brush = Brush.verticalGradient(
+                        listOf(
+                            Color.Transparent,
+                            Color.Black
+                        )
+                    )).constrainAs(itemBox) {
+
+                        top.linkTo(title.top, margin = -(4).dp)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+
+            ) {
+
+            }
+
+            Icon(
+                imageVector = itemStarWarsItem.type.icon,
+                contentDescription = itemStarWarsItem.title,
+                modifier = Modifier.constrainAs(icon) {
+
+                    top.linkTo(title.top)
+                    bottom.linkTo(description.bottom)
+                    end.linkTo(parent.end, margin = 4.dp)
+
+                }
             )
 
             Text(
                 itemStarWarsItem.title,
                 modifier = Modifier.constrainAs(title) {
 
-                    top.linkTo(parent.top)
-                    //bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
+                    bottom.linkTo(description.top)
+                    start.linkTo(parent.start, margin = 4.dp)
 
                 }
             )
@@ -486,12 +583,12 @@ private fun CardItem(itemStarWarsItem: StarWarsItem) {
                 itemStarWarsItem.description,
                 modifier = Modifier.constrainAs(description) {
 
-                    top.linkTo(title.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom, margin = 4.dp)
+                    start.linkTo(parent.start, margin = 4.dp)
 
                 }
             )
+
 
         }
 

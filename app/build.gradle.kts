@@ -1,6 +1,14 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("kapt")
+    alias(libs.plugins.hilt)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("com.squareup:javapoet:1.13.0")
+    }
 }
 
 android {
@@ -79,5 +87,22 @@ dependencies {
 
     //haze
     implementation(libs.haze)
-    
+
+    //paging
+    implementation(libs.pagingCompose)
+
+    //hill
+    implementation(libs.dagger.hilt)
+    implementation(libs.dagger.hilt.navigation)
+    kapt(libs.dagger.hilt.compiler)
+
+    //coil
+    implementation(libs.coil.compose)
+
+    //retrofit2
+    implementation(libs.retrofit2.retrofit)
+    implementation(libs.converter.gson)
+
+    //implementation("com.squareup:javapoet:1.13.0")
+
 }

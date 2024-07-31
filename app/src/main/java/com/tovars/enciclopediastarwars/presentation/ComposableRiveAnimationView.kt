@@ -1,4 +1,4 @@
-package com.tovars.enciclopediastarwars.screem
+package com.tovars.enciclopediastarwars.presentation
 
 import androidx.annotation.RawRes
 import androidx.compose.runtime.Composable
