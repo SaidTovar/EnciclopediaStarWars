@@ -1,6 +1,7 @@
-package com.tovars.enciclopediastarwars.data
+package com.tovars.enciclopediastarwars.data.starwarsData
 
-import com.tovars.enciclopediastarwars.data.response.WrapperPeopleResponse
+import androidx.annotation.Keep
+import com.tovars.enciclopediastarwars.data.starwarsData.response.WrapperPeopleResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 

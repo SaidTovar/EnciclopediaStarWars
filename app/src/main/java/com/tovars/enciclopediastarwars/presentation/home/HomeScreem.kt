@@ -1,5 +1,12 @@
 package com.tovars.enciclopediastarwars.presentation.home
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +19,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,18 +36,22 @@ import androidx.compose.material.icons.filled.Rocket
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.rounded.ChangeCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -58,6 +70,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import app.rive.runtime.kotlin.core.ExperimentalAssetLoader
 import app.rive.runtime.kotlin.core.Fit
+import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.tovars.enciclopediastarwars.R
 import com.tovars.enciclopediastarwars.presentation.ComposableRiveAnimationView
 import com.tovars.enciclopediastarwars.presentation.model.People
@@ -337,91 +351,81 @@ private fun ItemsFilter() {
 
 }
 
-
 data class StarWarsItem(
     val title: String,
     val description: String,
     val image: Int,
-    val type: ItemType2,
+    val type: ItemType,
     val id: Long = Random.nextLong()
 )
 
-sealed class ItemType2(val icon: ImageVector) {
-    data object Movie : ItemType2(Icons.Filled.Movie)
-    data object Person : ItemType2(Icons.Filled.Person)
-    data object Planet : ItemType2(Icons.Filled.Public)
-    data object Starship : ItemType2(Icons.Filled.RocketLaunch)
-    data object Vehicle : ItemType2(Icons.Filled.DirectionsCar)
+sealed class ItemType(val icon: ImageVector) {
+    data object Movie : ItemType(Icons.Filled.Movie)
+    data object Person : ItemType(Icons.Filled.Person)
+    data object Planet : ItemType(Icons.Filled.Public)
+    data object Starship : ItemType(Icons.Filled.RocketLaunch)
+    data object Vehicle : ItemType(Icons.Filled.DirectionsCar)
 }
 
 @Composable
 private fun ItemsList(homeViewModel: HomeViewModel) {
 
-    val itemsList = listOf(
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
-        // Add more items as needed
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
-        // Add more items as needed
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
-
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
-        // Add more items random
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
-        // Add more items as needed
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
-
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
-        StarWarsItem("Sand Crawler", "Sand Crawler", R.drawable.sandcrawler, ItemType2.Vehicle),
-        // Add more items as needed
-        StarWarsItem("Tatooine", "Tatooine", R.drawable.tatooine, ItemType2.Planet),
-        StarWarsItem("A new hope", "A new hope", R.drawable.a_new_hope, ItemType2.Movie),
-        StarWarsItem("Luke Skywalker", "Luke Skywalker", R.drawable.luke2, ItemType2.Person),
-        StarWarsItem("X-wing", "X-wing", R.drawable.xwing, ItemType2.Starship),
-    )
-
     val listPeople = homeViewModel.listPeople.collectAsLazyPagingItems()
 
-    LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Fixed(2),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalItemSpacing = 16.dp,
-        contentPadding = PaddingValues(16.dp),
+    if (listPeople.itemCount == 0) {
 
+        Box (modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ){
+            ItemLoading()
+        }
+
+    } else {
+
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalItemSpacing = 16.dp,
+            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier.background(Color.Transparent)
         ) {
 
-        items(listPeople.itemCount) {
+            items(listPeople.itemCount, key = { it.hashCode().toLong() }) {
 
-            listPeople[it]?.let { people ->
+                listPeople[it]?.let { people ->
 
-                CardItem2(people)
+                    CardItem2(people)
+
+                }
 
             }
 
         }
 
-       /* items(itemsList, key = { it.id }) {
-
-            CardItem(it)
-
-        }*/
-
     }
+
+}
+
+@Composable
+fun ItemLoading() {
+
+    val rotation by rememberInfiniteTransition(label = "").animateFloat(
+        initialValue = 360f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ), label = ""
+    )
+
+    Icon(
+        Icons.Rounded.ChangeCircle,
+        contentDescription = "",
+        tint = Color.White,
+        modifier = Modifier
+            .size(20.dp)
+            .rotate(rotation)
+    )
 
 }
 
@@ -429,34 +433,52 @@ private fun ItemsList(homeViewModel: HomeViewModel) {
 private fun CardItem2(people: People) {
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .animateContentSize()
             .clip(RoundedCornerShape(10.dp))
-            .clickable { }
+            .clickable { },
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = Color(0x67123557)
+        )
     ) {
 
-        ConstraintLayout {
+        ConstraintLayout(modifier = Modifier) {
 
             val (itemBox, title, description, icon) = createRefs()
-/*
-            val painter = painterResource(id = itemStarWarsItem.image)
 
-            val aspectRatio = painter.intrinsicSize.width / painter.intrinsicSize.height
+            val imageState =
+                remember { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
 
-            Image(
-                painter = painter,
-                contentDescription = itemStarWarsItem.title,
+            var aspectRatio by remember { mutableFloatStateOf(1f) }
+
+            AsyncImage(
+                model = people.url,
+                contentDescription = people.name,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.aspectRatio(aspectRatio)
-            )*/
+                modifier = Modifier.aspectRatio(aspectRatio),
+                onState = { state ->
+                    // Actualiza el estado cuando el estado del pintor cambia
+                    imageState.value = state
+                }
+            )
+
+            LaunchedEffect(imageState.value) {
+                aspectRatio = ((imageState.value.painter?.intrinsicSize?.width
+                    ?: 1f) / (imageState.value.painter?.intrinsicSize?.height ?: 1f))
+            }
+
 
             Box(
                 modifier = Modifier
-                    .background(brush = Brush.verticalGradient(
-                        listOf(
-                            Color.Transparent,
-                            Color.Black
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.Black
+                            )
                         )
-                    )).constrainAs(itemBox) {
+                    )
+                    .constrainAs(itemBox) {
 
                         top.linkTo(title.top, margin = -(4).dp)
                         bottom.linkTo(parent.bottom)
@@ -537,12 +559,15 @@ private fun CardItem(itemStarWarsItem: StarWarsItem) {
 
             Box(
                 modifier = Modifier
-                    .background(brush = Brush.verticalGradient(
-                        listOf(
-                            Color.Transparent,
-                            Color.Black
+                    .background(
+                        brush = Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                Color.Black
+                            )
                         )
-                    )).constrainAs(itemBox) {
+                    )
+                    .constrainAs(itemBox) {
 
                         top.linkTo(title.top, margin = -(4).dp)
                         bottom.linkTo(parent.bottom)

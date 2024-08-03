@@ -1,8 +1,10 @@
-package com.tovars.enciclopediastarwars.data.response
+package com.tovars.enciclopediastarwars.data.starwarsData.response
 
+import androidx.annotation.Keep
 import com.google.gson.annotations.SerializedName
 import com.tovars.enciclopediastarwars.presentation.model.People
 
+@Keep
 data class PeopleResponse(
     @SerializedName("name") val name: String,
     @SerializedName("height") val height: String?,

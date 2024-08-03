@@ -1,7 +1,8 @@
 package com.tovars.enciclopediastarwars.presentation.model
 
-import com.google.gson.annotations.SerializedName
+import androidx.annotation.Keep
 
+@Keep
 data class People(
     val name: String,
     val height: String?,
@@ -12,5 +13,7 @@ data class People(
     val films: List<String>?,
     val species: List<String>?,
     val vehicles: List<String>?,
-    val starships: List<String>?
+    val starships: List<String>?,
+    val url: String = ""
+
 )
